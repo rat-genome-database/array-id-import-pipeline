@@ -1,0 +1,13 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+    <bean id="importer" class="edu.mcw.rgd.ArrayIdImporter" >
+        <property name="version" value="Array Id Importer v. 1.4.5 (Sep 25, 2018)" />
+        <property name="taxonNcbiToEnsemble" >
+            <map>
+               <entry key="Canis lupus familiaris" value="Canis familiaris"/>
+            </map>
+        </property>
+    </bean>
+
+</beans>

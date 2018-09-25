@@ -1,0 +1,28 @@
+v. 1.4.5, Sep 25, 2018
+  - moved from subversion to github
+
+v. 1.4.4, Jun 1, 2017
+  - added support for other species; currently there is data for DOG
+
+v. 1.4.3, Mar 20, 2017
+  - upgraded from ANT to GRADLE
+
+v. 1.4.2, Nov 21, 2014
+  - updated jars, improved logging
+
+v. 1.4.1, Aug 11, 2014
+  - updated jars, improved logging
+
+v. 1.4.0, Mar 31, 2014
+  - list of affymetrix types is no longer using file properties - it is downloaded automatically
+    from synergizer website; that provides most flexibility
+  - updated jars
+
+v. 1.3.1, Mar 7, 2014
+  - improved conflict resolution (filtered out mappings of GeneId=>(gene splices and alleles)
+  - improved logging (shorter and more relevant log files)
+  - updated jars
+
+v. 1.3, Aug 20, 2013
+  - changed load scheme for drop-and-reload to incremental-load to improve performance
+  - added logs insertedAffyIds and deletedAffyIds
