@@ -7,23 +7,20 @@ import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.process.Utils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
- * User: mtutaj
- * Date: 10/10/12
- * Time: 4:16 PM
+ * @author mtutaj
+ * @since 10/10/12
  * <p>
  * all traffic to/from database must go through this class
  */
 public class ArrayIdDao {
 
-    Log logInserted = LogFactory.getLog("insertedAffyIds");
-    Log logDeleted = LogFactory.getLog("deletedAffyIds");
+    Logger logInserted = Logger.getLogger("insertedAffyIds");
+    Logger logRetired = Logger.getLogger("retiredAffyIds");
 
     AliasDAO adao = new AliasDAO();
     XdbIdDAO xdao = new XdbIdDAO();
@@ -74,17 +71,25 @@ public class ArrayIdDao {
     Map<String, List<Gene>> _cacheGenes = new HashMap<>(20003);
 
     /**
-     * delete a list of aliases; note: all aliases must have set ALIAS_KEY
+     * retired aliases get their type changed to old_array_id_affy xxx
      * @param aliases list of Alias objects
      * @throws Exception if something wrong happens in spring framework
-     * @return number of deleted aliases
      */
-    public int deleteAliases(List<Alias> aliases) throws Exception{
+    public void retireAliases(List<Alias> aliases) throws Exception{
+
+        Set<String> aliasTypesNonArray = new HashSet<>(adao.getAliasTypesExcludingArrayIds());
         for( Alias alias: aliases ) {
-            logDeleted.info(SpeciesType.getCommonName(alias.getSpeciesTypeKey())+" RGD:"+alias.getRgdId()
+            // change the alias type by adding prefix 'old_'
+            alias.setTypeName( "old_"+alias.getTypeName() );
+            // ensure the type name is on alias types
+            if( !aliasTypesNonArray.contains(alias.getTypeName()) ) {
+                insertAliasType(alias.getTypeName());
+                aliasTypesNonArray.add(alias.getTypeName());
+            }
+            adao.updateAlias(alias);
+            logRetired.info(SpeciesType.getCommonName(alias.getSpeciesTypeKey())+" RGD:"+alias.getRgdId()
                     +" "+alias.getTypeName()+" "+alias.getValue());
         }
-        return adao.deleteAliases(aliases);
     }
 
     /**

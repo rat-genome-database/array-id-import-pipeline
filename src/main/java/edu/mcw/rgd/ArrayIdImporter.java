@@ -2,8 +2,7 @@ package edu.mcw.rgd;
 
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.process.Utils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -13,15 +12,13 @@ import java.util.*;
 import java.util.Map;
 
 /**
- * Created by IntelliJ IDEA.
- * User: jdepons
- * Date: 4/26/12
- * Time: 12:55 PM
+ * @author jdepons
+ * @since 4/26/12
  * Pipeline job to import array ids from http://llama.mshri.on.ca/synergizer/translate/
  */
 public class ArrayIdImporter {
 
-    static Log log = LogFactory.getLog("core");
+    static Logger log = Logger.getLogger("core");
 
     ArrayIdDao dao = new ArrayIdDao();
     private String version;
@@ -150,8 +147,8 @@ public class ArrayIdImporter {
 
         aliasesForDelete.removeAll(aliasesIncoming); // IN-RGD SUBTRACT INCOMING
         if( !aliasesForDelete.isEmpty() ) {
-            dao.deleteAliases(new ArrayList<>(aliasesForDelete));
-            msg += ", deleted="+aliasesForDelete.size();
+            dao.retireAliases(new ArrayList<>(aliasesForDelete));
+            msg += ", retired="+aliasesForDelete.size();
         }
         log.info(msg);
     }

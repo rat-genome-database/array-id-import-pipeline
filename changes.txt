@@ -1,3 +1,6 @@
+v. 1.4.6, Jan 22, 2019
+  - no longer deletes stale array ids; instead 'retires' them by appending 'old_'
+
 v. 1.4.5, Sep 25, 2018
   - moved from subversion to github
 
