@@ -8,6 +8,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 import synergizer.SynergizerClient;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ import java.util.Map;
  */
 public class ArrayIdImporter {
 
-    static Logger log = Logger.getLogger("core");
+    Logger log = Logger.getLogger("core");
 
     ArrayIdDao dao = new ArrayIdDao();
     private String version;
@@ -34,20 +35,29 @@ public class ArrayIdImporter {
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
         ArrayIdImporter importer = (ArrayIdImporter) (bf.getBean("importer"));
-        log.info(importer.getVersion());
-        long time1 = System.currentTimeMillis();
 
-        importer.run();
-
-        long time2 = System.currentTimeMillis();
-        log.info("array import complete: "+Utils.formatElapsedTime(time1, time2));
+        try {
+            importer.run();
+        } catch( Exception e ) {
+            Utils.printStackTrace(e, importer.log);
+            importer.log.fatal("=== FATAL ERROR ===");
+            throw e;
+        }
     }
 
     public void run() throws Exception {
 
+        Date time0 = new Date();
+
+        log.info(getVersion());
+        log.info("   "+dao.getConnectionInfo());
+        SimpleDateFormat sdt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        log.info("   started at "+sdt.format(time0));
+
         affyAliasTypes = new HashSet<>(dao.getAffyAliasTypes());
 
-        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
+        List<Integer> speciesTypeKeys = new ArrayList<>(SpeciesType.getSpeciesTypeKeys());
+        for( int speciesTypeKey: speciesTypeKeys ) {
             if( speciesTypeKey>0 ) {
                 exec(speciesTypeKey);
             }
@@ -61,6 +71,8 @@ public class ArrayIdImporter {
                 log.warn(" MULTI> GeneId:"+entry.getKey()+", RgdIds:"+entry.getValue());
             }
         }
+
+        log.info("array import complete: "+Utils.formatElapsedTime(time0.getTime(), System.currentTimeMillis()));
     }
 
     void exec( int speciesTypeKey ) throws Exception {
@@ -74,33 +86,36 @@ public class ArrayIdImporter {
         }
 
         long time1 = System.currentTimeMillis();
-        System.out.println("\nStarting import for "+taxonomicName);
+        log.info("\nStarting import for "+taxonomicName);
 
         SynergizerClient client = new synergizer.SynergizerClient();
         Set<String> arrayIds = client.availableDomains("ensembl", taxonomicName);
         if( arrayIds.isEmpty() ) {
-            System.out.println("  no array ids for "+taxonomicName);
+            log.info("  no array ids for "+taxonomicName);
         }
         else {
-            Set<String> source_ids = getSourceIds(speciesTypeKey);
-
+            Set<String> sourceIds = getSourceIds(speciesTypeKey);
+            if( sourceIds.isEmpty() ) {
+                log.info("  no NCBI gene ids in RGD for "+taxonomicName);
+            }
+            else
             for (String arrayId : arrayIds) {
                 if (!arrayId.startsWith("affy_"))
                     continue;
 
                 String aliasType = "array_id_" + arrayId + "_ensembl";
                 if (!affyAliasTypes.contains(aliasType)) {
-                    System.out.println("INSERTING ALIAS TYPE " + aliasType);
+                    log.info("INSERTING ALIAS TYPE " + aliasType);
                     dao.insertAliasType(aliasType);
                     affyAliasTypes.add(aliasType);
                 }
 
-                exec("ensembl", taxonomicName, speciesTypeKey, "entrezgene", arrayId, source_ids);
+                exec("ensembl", taxonomicName, speciesTypeKey, "entrezgene", arrayId, sourceIds);
             }
         }
 
         long time2 = System.currentTimeMillis();
-        System.out.println("Finished import for "+taxonomicName+"; "+Utils.formatElapsedTime(time1, time2));
+        log.info("Finished import for "+taxonomicName+"; "+Utils.formatElapsedTime(time1, time2));
     }
 
     Set<String> getSourceIds(int speciesTypeKey) throws Exception {
@@ -132,7 +147,7 @@ public class ArrayIdImporter {
         String aliasTypeName= "array_id_" + to + "_ensembl";
 
         List<Alias> aliasesInRgd = dao.getAliasesByType(aliasTypeName);
-        String msg = aliasTypeName+": in_RGD="+aliasesInRgd.size();
+        String msg = "  "+aliasTypeName+": in_RGD="+aliasesInRgd.size();
 
         Set<Alias> aliasesIncoming = getIncomingAliases(speciesTypeKey, aliasTypeName, res.translationMap().entrySet());
         msg += ", incoming="+aliasesIncoming.size();

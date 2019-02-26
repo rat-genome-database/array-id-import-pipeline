@@ -11,4 +11,4 @@ fi
 
 $APPDIR/_run.sh "$@"
 
-mailx -s "[$SERVER] Array Id Import Pipeline Run " < $APPDIR/run.log $EMAIL_LIST
+mailx -s "[$SERVER] Array Id Import Pipeline Run " < $APPDIR/logs/summary.log $EMAIL_LIST

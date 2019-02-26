@@ -6,7 +6,6 @@ import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
-import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -24,6 +23,10 @@ public class ArrayIdDao {
 
     AliasDAO adao = new AliasDAO();
     XdbIdDAO xdao = new XdbIdDAO();
+
+    public String getConnectionInfo() {
+        return adao.getConnectionInfo();
+    }
 
     /**
      * return external ids for any combination of parameters given in filter;
@@ -57,8 +60,7 @@ public class ArrayIdDao {
             Iterator<Gene> it = genes.iterator();
             while( it.hasNext() ) {
                 Gene gene = it.next();
-                if( Utils.stringsAreEqual(gene.getType(), "allele") ||
-                    Utils.stringsAreEqual(gene.getType(), "splice")) {
+                if( gene.isVariant() ) {
                     it.remove();
                 }
             }
