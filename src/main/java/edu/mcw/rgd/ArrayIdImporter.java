@@ -72,7 +72,8 @@ public class ArrayIdImporter {
             }
         }
 
-        log.info("array import complete: "+Utils.formatElapsedTime(time0.getTime(), System.currentTimeMillis()));
+        log.info("");
+        log.info("Array Id import complete: "+Utils.formatElapsedTime(time0.getTime(), System.currentTimeMillis()));
     }
 
     void exec( int speciesTypeKey ) throws Exception {
@@ -86,7 +87,7 @@ public class ArrayIdImporter {
         }
 
         long time1 = System.currentTimeMillis();
-        log.info("\nStarting import for "+taxonomicName);
+        log.info("\n"+taxonomicName);
 
         SynergizerClient client = new synergizer.SynergizerClient();
         Set<String> arrayIds = client.availableDomains("ensembl", taxonomicName);
@@ -115,7 +116,7 @@ public class ArrayIdImporter {
         }
 
         long time2 = System.currentTimeMillis();
-        log.info("Finished import for "+taxonomicName+"; "+Utils.formatElapsedTime(time1, time2));
+        log.info(taxonomicName+" OK - "+Utils.formatElapsedTime(time1, time2));
     }
 
     Set<String> getSourceIds(int speciesTypeKey) throws Exception {
