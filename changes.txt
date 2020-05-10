@@ -1,3 +1,6 @@
+May 10, 2020
+  updated jar dependencies
+
 Dec 19, 2019
   - removed unused log 'spring'
 
