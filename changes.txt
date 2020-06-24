@@ -1,3 +1,6 @@
+Jun 24, 2020
+  simplified shell scripts
+
 May 29, 2020
   updated jar dependencies
 
