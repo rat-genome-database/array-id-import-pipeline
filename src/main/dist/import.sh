@@ -1,6 +1,6 @@
 #import AffyMetrix ids for rat, mouse, human and other species (if available) into ALIASES table
-
-APPDIR=/home/rgddata/pipelines/ArrayIdImport
+APPNAME=ArrayIdImport
+APPDIR=/home/rgddata/pipelines/$APPNAME
 
 SERVER=`hostname -s | tr '[a-z]' '[A-Z]'`
 if [ "$SERVER" == "REED" ]; then
