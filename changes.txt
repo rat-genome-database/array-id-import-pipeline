@@ -1,3 +1,6 @@
+Sep 14, 2020
+  fixed rare issue with retired array ids
+
 Jun 24, 2020
   simplified shell scripts
 

@@ -20,6 +20,7 @@ public class ArrayIdDao {
 
     Logger logInserted = Logger.getLogger("insertedAffyIds");
     Logger logRetired = Logger.getLogger("retiredAffyIds");
+    Logger logDeleted = Logger.getLogger("deletedAffyIds");
 
     AliasDAO adao = new AliasDAO();
     XdbIdDAO xdao = new XdbIdDAO();
@@ -57,13 +58,7 @@ public class ArrayIdDao {
             genes = xdao.getActiveGenesByXdbId(XdbId.XDB_KEY_NCBI_GENE, accId);
 
             // exclude splices and alleles
-            Iterator<Gene> it = genes.iterator();
-            while( it.hasNext() ) {
-                Gene gene = it.next();
-                if( gene.isVariant() ) {
-                    it.remove();
-                }
-            }
+            genes.removeIf(Gene::isVariant);
             _cacheGenes.put(accId, genes);
         }
         return genes;
@@ -82,16 +77,38 @@ public class ArrayIdDao {
         Set<String> aliasTypesNonArray = new HashSet<>(adao.getAliasTypesExcludingArrayIds());
         for( Alias alias: aliases ) {
             // change the alias type by adding prefix 'old_'
-            alias.setTypeName( "old_"+alias.getTypeName() );
+            String oldTypeName = "old_"+alias.getTypeName();
             // ensure the type name is on alias types
-            if( !aliasTypesNonArray.contains(alias.getTypeName()) ) {
-                insertAliasType(alias.getTypeName());
-                aliasTypesNonArray.add(alias.getTypeName());
+            if( !aliasTypesNonArray.contains(oldTypeName) ) {
+                insertAliasType(oldTypeName);
+                aliasTypesNonArray.add(oldTypeName);
             }
-            adao.updateAlias(alias);
-            logRetired.info(SpeciesType.getCommonName(alias.getSpeciesTypeKey())+" RGD:"+alias.getRgdId()
-                    +" "+alias.getTypeName()+" "+alias.getValue());
+
+            int aliasKey = getAliasInRgd(alias.getRgdId(), oldTypeName, alias.getValue());
+            if( aliasKey==0 ) {
+                // alias of type 'old_' xxx is not in RGD -- rename the type from 'array_id_xxx' to 'old_array_id_xxx'
+                alias.setTypeName(oldTypeName);
+                adao.updateAlias(alias);
+                logRetired.info(SpeciesType.getCommonName(alias.getSpeciesTypeKey()) + " RGD:" + alias.getRgdId()
+                        + " " + alias.getTypeName() + " " + alias.getValue());
+            } else {
+                // alias of type 'old_' xxx is already in RGD -- delete 'array_id_xxx'
+                adao.deleteAlias(aliasKey);
+                logDeleted.info(SpeciesType.getCommonName(alias.getSpeciesTypeKey()) + " RGD:" + alias.getRgdId()
+                        + " " + alias.getTypeName() + " " + alias.getValue());
+            }
         }
+    }
+
+    int getAliasInRgd(int rgdId, String aliasType, String aliasValue) throws Exception {
+        String[] aliasTypes = new String[]{aliasType};
+        List<Alias> aliasesInRgd = adao.getAliases(rgdId, aliasTypes);
+        for( Alias a: aliasesInRgd ) {
+            if( a.getValue().equals(aliasValue) ) {
+                return a.getKey();
+            }
+        }
+        return 0;
     }
 
     /**
@@ -121,12 +138,7 @@ public class ArrayIdDao {
 
     public List<String> getAffyAliasTypes() throws Exception {
         List<String> aliasTypes = adao.getAliasTypes();
-        Iterator<String> it = aliasTypes.iterator();
-        while( it.hasNext() ) {
-            String aliasType = it.next();
-            if( !aliasType.startsWith("array_id_affy_") )
-                it.remove();
-        }
+        aliasTypes.removeIf(aliasType -> !aliasType.startsWith("array_id_affy_"));
         return aliasTypes;
     }
 
