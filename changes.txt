@@ -1,3 +1,6 @@
+Dec 20, 2021
+  upgraded log4j to avoid zero day exploit
+
 Sep 14, 2020
   fixed rare issue with retired array ids
 

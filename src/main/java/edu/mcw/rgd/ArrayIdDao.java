@@ -6,7 +6,8 @@ import edu.mcw.rgd.datamodel.Alias;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -18,9 +19,9 @@ import java.util.*;
  */
 public class ArrayIdDao {
 
-    Logger logInserted = Logger.getLogger("insertedAffyIds");
-    Logger logRetired = Logger.getLogger("retiredAffyIds");
-    Logger logDeleted = Logger.getLogger("deletedAffyIds");
+    Logger logInserted = LogManager.getLogger("insertedAffyIds");
+    Logger logRetired = LogManager.getLogger("retiredAffyIds");
+    Logger logDeleted = LogManager.getLogger("deletedAffyIds");
 
     AliasDAO adao = new AliasDAO();
     XdbIdDAO xdao = new XdbIdDAO();
