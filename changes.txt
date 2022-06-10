@@ -1,3 +1,6 @@
+Jun 10, 2022
+  fixed logging of date stamps
+
 Feb 03, 2022
   updated README.md
 
