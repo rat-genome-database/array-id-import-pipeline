@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="importer" class="edu.mcw.rgd.ArrayIdImporter" >
-        <property name="version" value="Array Id Importer  -- build Jan 17, 2023" />
+        <property name="version" value="Array Id Importer  -- build Apr 17, 2023" />
         <property name="taxonNcbiToEnsemble" >
             <map>
                <entry key="Canis lupus familiaris" value="Canis familiaris"/>
